@@ -5,23 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>中国大学排行榜</title>
   <link rel = "stylesheet" href = "css/themecss.css">
-  <link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css">
   <!--pure css-->
-  <link rel="stylesheet" href="css/pure-min.css">
-  <link rel="stylesheet" href="css/side-menu.css">
+  <link rel="stylesheet" href="css/pure.css">
+  <link rel="stylesheet" href="css/blog.css">
+  <link rel="stylesheet" href="css/grids-responsive-min.css">
   <!--[if lte IE 8]>
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-old-ie-min.css">
   <![endif]-->
-    <script src="js/jquery-1.4.js"></script>
-  <!--D3 js-->
+  <!--pure css-->
     <script type="text/javascript" src="./exampleData/treemap.d3.js"></script>
     <script type="text/javascript" src="./exampleData/treemap.d3.layout.js"></script>
-    <script src="./js/d3.v3.min.js"></script>
-  <!--tooltip js/css-->
-    <link rel="stylesheet" type="text/css" href="css/tooltip-classic.css" />
+  <script src="./js/d3.v3.min.js"></script>
 </head>
 
-<body class>
+<body>
 <!--
 =============prepare===============
 -->
@@ -53,67 +50,38 @@ function getSize(){
 var winSize = getSize();
 </script>
 
+  <div id="layout">
 
-<div id="layout">
+      <div class="sidebar pure-u-1 pure-u-md-1-4">
+          <div class="header">
+              <h1 class="brand-title">College Ranking</h1>
+              <p class="brand-tagline">Build a personalized University Rankings. </p>
+          </div>
+          <div class="nav">
+            <div class="weight param">
+                <p>选择参数</p>
+            </div>
 
-    <a href="#menu" id="menuLink" class="menu-link">
-        <!-- Hamburger icon -->
-        <span></span>
-    </a>
+            <div class="type param">
+                <p>选择学校类型</p>
+                <form class="pure-form pure-form-stacked">
+                    <fieldset>
+                      <input id = "type-all" type = "checkbox" checked = "true" hidden onclick = "type_all(this.checked)"/>
+                      <label for = "type-all" class = "type-all">全选</label>
+                    </fieldset>
+                </form>
+            </div>
+          </div>
+      </div>
 
-    <div id="menu">
-        <div class="pure-menu">
-            <a class="pure-menu-heading" href="#">College</a>
-
-            <ul class="pure-menu-list">
-
-                <li class="pure-menu-item">
-                      <span class="tooltip tooltip-effect-1">
-                        <a href="#" class="pure-menu-link tooltip-item"><i class="fa fa-check-square fa-3x"></i><span>选择参数</span></a>
-                        <div class="selectParam tooltip-content clearfix"></div>
-                      </span>
-                </li>
-
-                <li class="pure-menu-item">
-                      <span class="tooltip tooltip-effect-1">
-                        <a href="#" class="pure-menu-link tooltip-item"><i class="fa fa-university fa-3x"></i><span>学校类型</span></a>
-                        <div class="universityType tooltip-content clearfix">
-                          <form class="pure-form pure-form-stacked">
-                              <fieldset>
-                                <input id = "type-all" type = "checkbox" checked = "true" hidden onclick = "type_all(this.checked)"/>
-                                <label for = "type-all" class = "type-all">全选</label>
-                                <div id = "type-list"></div>
-                              </fieldset>
-                          </form>
-                        </div>
-                      </span>
-                </li>
-
-                <li class="pure-menu-item" class="menu-item-divided pure-menu-selected">
-                  <span class="tooltip tooltip-effect-1">
-                        <a href="#" class="pure-menu-link tooltip-item"><i class="fa fa-map-marker fa-3x"></i><span>学校地区</span></a>
-                        <div class="universityRegion tooltip-content clearfix"></div>
-                    </span>
-                </li>
-                <li class="pure-menu-item"><a href="#" class="pure-menu-link"><i class="fa fa-cloud-download fa-3x"></i><span>下载</span></a></li>
-            </ul>
-        </div>
-    </div><!--menu end-->
-
-    <div id="main">
-        <div class="header">
-            <h1 class="content-subhead">RANK POST</h1>
-        </div>
-
-        <div class="content">
-              <div class="posts">   
+      <div class="content pure-u-1 pure-u-md-3-4">
+              <!-- A wrapper for all the blog posts -->
+              <div class="posts">
+                  <h1 class="content-subhead">RANK POST</h1>
               </div>
-        </div>
-    </div><!---main end-->
+      </div>
 
-</div><!--layout end-->
-
-<script src="js/pureUI.js"></script>
+  </div>
 
 <!--
 =============draw main rank=============
@@ -205,10 +173,9 @@ var winSize = getSize();
               .sticky(true)
               .value(function(d) { return d.size; });
 
-          var treemapSvg = d3.select("body").select("#layout").select(".selectParam").append("div")
+          var treemapSvg = d3.select("body").select(".sidebar").select(".nav").select(".weight").append("div")
               .attr("class", "selectBoard")
               .style("position", "relative")
-              .style("float", "left")
               .style("width", treemapWidth + "px")
               .style("height", treemapHeight + "px")
               .append("svg:svg")
@@ -250,62 +217,6 @@ var winSize = getSize();
                 .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
           }
      </script>
-
-<!--
-=============draggable chinamap=============
--->
-     <script>
-  var geomapWidth  = 500;
-  var geomapHeight = 500;
-  
-  var geomapSvg = d3.select("body").select("#layout").select(".universityRegion").append("div")
-              .attr("class", "selectBoard")
-              .style("position", "relative")
-              .style("float", "left")
-              .style("width", geomapWidth + "px")
-              .style("height", geomapHeight + "px")
-              .append("svg:svg")
-              .attr("width", geomapWidth)
-              .attr("height", geomapHeight)
-              .append("svg:g")
-              .attr("transform", "translate(.5,.5)");
-  
-  var projection = d3.geo.mercator()
-            .center([105, 35])
-            .scale(450)
-            .translate([geomapWidth/2, geomapHeight/2]);
-  
-  var geomapPath = d3.geo.path()
-          .projection(projection);
-  
-  d3.json("data/geoChina.json", function(error, root) {
-    
-    if (error) 
-      return console.error(error);
-    console.log(root.features);
-    
-    geomapSvg.selectAll("geomapPath")
-      .data( root.features )
-      .enter()
-      .append("path")
-      .attr("stroke","#000")
-      .attr("stroke-width",1)
-      .attr("fill", function(d,i){
-        return color(i);
-      })
-      .attr("d", geomapPath )
-      .on("mouseover",function(d,i){
-                d3.select(this)
-                    .attr("fill","#f7fcf0");
-            })
-            .on("mouseout",function(d,i){
-                d3.select(this)
-                    .attr("fill",color(i));
-            });
-    
-  });
-
-</script>
 
 </body>
 </html>
