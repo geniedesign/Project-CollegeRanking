@@ -72,7 +72,14 @@ label{
 .menu-link span, .menu-link span:before, .menu-link span:after{
   -webkit-box-sizing: content-box !important;
   box-sizing: content-box !important;
-
+}
+.pure-menu-heading{
+ /* width:100px;
+  height:83px;
+  display: block !important;
+  background: url("../img/logo2.png") no-repeat !important;*/
+  background: #f92672 !important;
+  font-size: 1.4em !important;
 }
 /*.sidebar .nav .param{
     width:80%;
@@ -89,7 +96,9 @@ label{
 }*/
 
 
-/****************rank****************/
+/*
+*rank
+*/
 .axis path,
 .axis line {
   fill: none;
@@ -105,7 +114,9 @@ label{
   display: none;
 }
 
-/****************treemap****************/
+/*
+*treemap
+*/
 .chart {
   display: block;
   margin: auto;
@@ -131,3 +142,7 @@ rect {
 .selectBoard{
   margin:1em;
 }
+
+/*
+*geomap
+*/
