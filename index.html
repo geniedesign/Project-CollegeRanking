@@ -67,17 +67,17 @@ var winSize = getSize();
 
             <ul class="pure-menu-list">
 
-                <li class="pure-menu-item">
+                <li class="pure-menu-item selectParam">
                       <span class="tooltip tooltip-effect-1">
                         <a href="#" class="pure-menu-link tooltip-item"><i class="fa fa-check-square fa-3x"></i><span>选择参数</span></a>
-                        <div class="selectParam tooltip-content clearfix"></div>
+                        <div class="tooltip-content clearfix"></div>
                       </span>
                 </li>
 
-                <li class="pure-menu-item">
+                <li class="pure-menu-item universityType">
                       <span class="tooltip tooltip-effect-1">
                         <a href="#" class="pure-menu-link tooltip-item"><i class="fa fa-university fa-3x"></i><span>学校类型</span></a>
-                        <div class="universityType tooltip-content clearfix">
+                        <div class="tooltip-content clearfix">
                           <form class="pure-form pure-form-stacked">
                               <fieldset>
                                 <input id = "type-all" type = "checkbox" checked = "true" hidden onclick = "type_all(this.checked)"/>
@@ -89,10 +89,10 @@ var winSize = getSize();
                       </span>
                 </li>
 
-                <li class="pure-menu-item" class="menu-item-divided pure-menu-selected">
+                <li class="pure-menu-item universityRegion" class="menu-item-divided pure-menu-selected">
                   <span class="tooltip tooltip-effect-1">
                         <a href="#" class="pure-menu-link tooltip-item"><i class="fa fa-map-marker fa-3x"></i><span>学校地区</span></a>
-                        <div class="universityRegion tooltip-content clearfix"></div>
+                        <div class="tooltip-content clearfix"></div>
                     </span>
                 </li>
                 <li class="pure-menu-item"><a href="#" class="pure-menu-link"><i class="fa fa-cloud-download fa-3x"></i><span>下载</span></a></li>
@@ -114,11 +114,27 @@ var winSize = getSize();
 </div><!--layout end-->
 
 <script src="js/pureUI.js"></script>
+<!--drag/hover/-->
+<script src="js/behaviors.js"></script>
 
-<!--
-=============draw main rank=============
--->
-    <script>
+<script>
+$(document).ready = drawTreeMap();
+
+var geoUnivCount = {};//统计省份数量
+var rankArray=["综合指标（校友会网）_科学研究","综合指标（校友会网）_人才培养","综合指标（校友会网）_综合声誉"];//rankingd初始化
+
+d3.csv("data/all.csv", function(error, data) {
+  drawMainRank(data);
+  drawGeoMap(geoUnivCount);
+})
+
+
+/*
+*draw main rank
+*/
+    function drawMainRank(data){
+        var color = d3.scale.ordinal()
+                         .range(["#557381","#cc7f9d","#aeafbf","#eec6ad","#746b7e","#76b0bb","#da8082","#bd96cb","#c5bcaf","#b5c1cf","#a1c5ad","#6e99a2","#3b525a","#9e9dba","#dd9d9c"]);
         var margin = {top: 20, right: 20, bottom: 30, left: 40},
               width = 960 - margin.left - margin.right,
               height = 3000 - margin.top - margin.bottom;
@@ -128,10 +144,6 @@ var winSize = getSize();
 
         var y = d3.scale.ordinal()
             .rangeRoundBands([0, height], .1);
-
-        var color = d3.scale.ordinal()
-                         .range(["#557381","#cc7f9d","#aeafbf","#eec6ad","#746b7e","#76b0bb","#da8082","#bd96cb","#c5bcaf","#b5c1cf","#a1c5ad","#6e99a2","#3b525a","#9e9dba","#dd9d9c"]);
-        var geoUnivCount = {};//统计省份数量
 
         var xAxis = d3.svg.axis()
             .scale(x)
@@ -148,12 +160,13 @@ var winSize = getSize();
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        d3.csv("data/all.csv", function(error, data) {
+        // data/all.csv data
+        //color.domain(d3.keys(rankArray));
           color.domain(d3.keys(data[0]).filter(function(key) { return (key !== "name")&&(key !== "type")&&(key !== "province"); }));
 
           data.forEach(function(d) {
             var x0 = 0;
-            d.param = color.domain().map(function(paramName) { return {paramName: paramName, x0: x0, x1: x0 += +d[paramName]}; });
+            d.param = color.domain().map(function(paramName) {return {paramName: paramName, x0: x0, x1: x0 += +d[paramName]}; });
             d.score = d.param[d.param.length - 1].x1;//total points
           });
 
@@ -197,13 +210,16 @@ var winSize = getSize();
             }
             geoUnivCount[data[i].province].count++;
           }//统计了省份中学校的数量
-        })
-    </script>
 
-<!--
-=============draggable treemap=============
--->
-     <script>
+    }//function drawMainRank()
+
+/*
+*draggable treemap
+*/
+     function drawTreeMap(){
+          var treemapColor = d3.scale.ordinal()
+                                   .range(["#CC7F9D","#EEC6AD","#76B0BB"]);
+
           var treemapWidth = 300,
                 treemapHeight = 300;
 
@@ -213,7 +229,7 @@ var winSize = getSize();
               .sticky(true)
               .value(function(d) { return d.size; });
 
-          var treemapSvg = d3.select("body").select("#layout").select(".selectParam").append("div")
+          var treemapSvg = d3.select("body").select("#layout").select(".selectParam").select(".tooltip-content").append("div")
               .attr("class", "selectBoard")
               .style("position", "relative")
               .style("float", "left")
@@ -226,30 +242,46 @@ var winSize = getSize();
               .attr("transform", "translate(.5,.5)");
 
           d3.json("data/flare.json", function(error, root) {
-
               var nodes = treemap.nodes(root)
                   .filter(function(d) {
                    return !d.children; });
-
               var cell = treemapSvg.selectAll("g")
                   .data(nodes)
                   .enter().append("svg:g")
                   .attr("class", "cell")
                   .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-                  .on("click", function(d) {console.log("click");});
+                  .on("mouseover",function(d,i){
+                            d3.select(this).select("rect")
+                               .style("fill","#f92572");
+                   })
+                  .on("click", function(d) {
+                         if(d3.select(this).select("rect").attr("class")=="clickFlagOn"){
+                            d3.select(this).select("rect")
+                              .attr("class","clickFlagOff")
+                              .style("fill",function(d) { return treemapColor(d.parent.name); });
+                          }else{
+                            d3.select(this).select("rect")
+                              .attr("class","clickFlagOn")
+                              .style("fill", "#f92572");
+                          }
+                  })
+                  .on("mouseout",function(d,i){
+                            d3.select(this).select("rect")
+                              .style("fill", function(d) { 
+                                if(d3.select(this).attr("class")=="clickFlagOn"){
+                               // if ($(this).hasClass('clickFlagOn')) {
+                                      return "#f92572"; 
+                                }else{return treemapColor(d.parent.name); }
+                                
+                              })
+                     })
+                  .call(treemapDrag);
 
               cell.append("svg:rect")
                   .attr("width", function(d) { return d.dx - 1; })
                   .attr("height", function(d) { return d.dy - 1; })
-                  .style("fill", function(d) { return color(d.parent.name); })
-                  .on("mouseover",function(d,i){
-                            d3.select(this)
-                               .style("fill","#f7fcf0");
-                   })
-                   .on("mouseout",function(d,i){
-                            d3.select(this)
-                            .style("fill", function(d) { return color(d.parent.name); })
-                     });
+                  .attr("class","clickFlagOff")
+                  .style("fill", function(d) { return treemapColor(d.parent.name); });
 
               cell.append("svg:text")
                   .attr("x", function(d) { return d.dx / 2; })
@@ -259,95 +291,96 @@ var winSize = getSize();
                   .text(function(d) { return d.name; });
           });
 
-          function position() {
-            this.style("left", function(d) { return d.x + "px"; })
-                .style("top", function(d) { return d.y + "px"; })
-                .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
-                .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
-          }
-     </script>
+     }//function drawTreeMap()
 
-<!--
-=============draggable chinamap=============
--->
-     <script>
-  var geomapWidth  = 500;
-  var geomapHeight = 500;
-  
-  var geomapSvg = d3.select("body").select("#layout").select(".universityRegion").append("div")
-              .attr("class", "selectBoard")
-              .style("position", "relative")
-              .style("float", "left")
-              .style("width", geomapWidth + "px")
-              .style("height", geomapHeight + "px")
-              .append("svg:svg")
-              .attr("width", geomapWidth)
-              .attr("height", geomapHeight)
-              .append("svg:g")
-              .attr("transform", "translate(.5,.5)");
-  
-  var projection = d3.geo.mercator()
-            .center([105, 35])
-            .scale(450)
-            .translate([geomapWidth/2, geomapHeight/2]);
-  
-  var geomapPath = d3.geo.path()
-          .projection(projection);
-  
-  d3.json("data/geoChina.json", function(error, root) {
-    
-    if (error) 
-      return console.error(error);
-    
-    geomapSvg.selectAll("geomapPath")
-      .data( root.features )
-      .enter()
-      .append("path")
-      .attr("stroke","#000")
-      .attr("stroke-width",2)
-      .style("fill", function(d,i){
-        var geoUniv = geoUnivCount[d.properties.name];
-                if(geoUniv == null){
-                  return "#000";
-                }else{
-                  if(geoUniv.count*0.1>1){
-                    return "rgba(249,38,114,1.0)";
-                  }
-                  return "rgba(249,38,114," + geoUniv.count*0.1 + ")";
-                }
-      })
-      .attr("d", geomapPath)
-      .on("mouseover",function(d,i){
-                d3.select(this)
-                   .style("fill","#f7fcf0");
-       })
-       .on("mouseout",function(d,i){
-                d3.select(this)
+
+/*
+*selectable region
+*/
+      var region = {
+        "西北": ["新疆", "甘肃", "宁夏", "青海", "陕西"],
+        "东北": ["黑龙江", "吉林", "辽宁"],
+        "华北": ["北京", "天津", "河北", "山西", "内蒙古"],
+        "华中": ["河南", "湖北", "湖南"],
+        "华南": ["广东", "广西", "海南"],
+        "华东": ["山东", "江苏", "安徽", "上海", "浙江", "江西", "福建"],
+        "西南": ["重庆", "四川", "贵州", "云南", "西藏"],
+      }
+
+
+
+
+/*
+*draggable chinamap
+*/
+      function drawGeoMap(geoUnivCount){
+            var geomapWidth  = 500;
+            var geomapHeight = 500;
+            
+            var geomapSvg = d3.select("body").select("#layout").select(".universityRegion").select(".tooltip-content").append("div")
+                        .attr("class", "selectBoard")
+                        .style("position", "relative")
+                        .style("float", "left")
+                        .style("width", geomapWidth + "px")
+                        .style("height", geomapHeight + "px")
+                        .append("svg:svg")
+                        .attr("width", geomapWidth)
+                        .attr("height", geomapHeight)
+                        .append("svg:g")
+                        .attr("transform", "translate(.5,.5)");
+            
+            var projection = d3.geo.mercator()
+                      .center([105, 35])
+                      .scale(450)
+                      .translate([geomapWidth/2, geomapHeight/2]);
+            
+            var geomapPath = d3.geo.path()
+                    .projection(projection);
+            
+            d3.json("data/geoChina.json", function(error, root) {
+              
+              if (error) 
+                return console.error(error);
+              
+              geomapSvg.selectAll("geomapPath")
+                .data( root.features )
+                .enter()
+                .append("path")
+                .attr("stroke","#000")
+                .attr("stroke-width",2)
                 .style("fill", function(d,i){
-                        var geoUniv = geoUnivCount[d.properties.name];
-                                if(geoUniv == null){
-                                  return "#000";
-                                }else{
-                                  if(geoUniv.count*0.1>1){
-                                    return "rgba(249,38,114,1.0)";
-                                  }
-                                  return "rgba(249,38,114," + geoUniv.count*0.1 + ")";
-                                }
-                  })
-         });
-/*         .on("click",function(d,i){
-          console.log("111");
-                d3.select(this)
-                   .style("stroke","#fff")
-                   .style("stroke-width","2px");
-         })*/
-
-/*      geomapSvg.append("svg:text")
-        .attr("x", function(d) { return d.dx / 2; })
-        .attr("y", function(d) { return d.dy / 2; })
-        .attr("text-anchor", "middle")
-        .text(function(d) { return d.name; });*/
-  });
+                  var geoUniv = geoUnivCount[d.properties.name];
+                          if(geoUniv == null){
+                            return "#000";
+                          }else{
+                            if(geoUniv.count*0.1>1){
+                              return "rgba(249,38,114,1.0)";
+                            }
+                            return "rgba(249,38,114," + geoUniv.count*0.1 + ")";
+                          }
+                })
+                .attr("d", geomapPath)
+                .on("mouseover",function(d,i){
+                          d3.select(this)
+                             .style("fill","#f7fcf0");
+                 })
+                 .on("mouseout",function(d,i){
+                          d3.select(this)
+                          .style("fill", function(d,i){
+                                  var geoUniv = geoUnivCount[d.properties.name];
+                                          if(geoUniv == null){
+                                            return "#000";
+                                          }else{
+                                            if(geoUniv.count*0.1>1){
+                                              return "rgba(249,38,114,1.0)";
+                                            }
+                                            return "rgba(249,38,114," + geoUniv.count*0.1 + ")";
+                                          }
+                            })
+                   })
+                  .call(treemapDrag);
+              });
+      }
 
 </script>
 

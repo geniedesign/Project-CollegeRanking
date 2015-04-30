@@ -42,8 +42,13 @@ label{
   display: inline-block;
   width:100%;
   float:left;
-  color:#f7fcf0;
   text-align: center;
+}
+.pure-menu-list a{
+  color:#f7fcf0 !important;
+}
+.pure-menu-list a:hover{
+  color:#f92572 !important;
 }
 .pure-menu-list span{
   font-size: 0.8em;
@@ -78,7 +83,7 @@ label{
   height:83px;
   display: block !important;
   background: url("../img/logo2.png") no-repeat !important;*/
-  background: #f92672 !important;
+  background: #666 !important;
   font-size: 1.4em !important;
 }
 /*.sidebar .nav .param{
