@@ -70,7 +70,14 @@ var winSize = getSize();
                 <li class="pure-menu-item selectParam">
                       <span class="tooltip tooltip-effect-1">
                         <a href="#" class="pure-menu-link tooltip-item"><i class="fa fa-check-square fa-3x"></i><span>选择参数</span></a>
-                        <div class="tooltip-content clearfix"></div>
+                        <div class="tooltip-content clearfix">
+                            <div class="treemap"></div>
+                            <div class="selectParam-legend">
+                              <a class="xiaoyouhui">综合指标（校友会网）<span></span></a>
+                              <a class="wushulianC">综合指标（武书连）<span></span></a>
+                              <a class="wushulianS">学科排名（武书连）<span></span></a>
+                            </div>
+                        </div>
                       </span>
                 </li>
 
@@ -121,12 +128,12 @@ var winSize = getSize();
 $(document).ready = drawTreeMap();
 
 var geoUnivCount = {};//统计省份数量
-var rankArray=["综合指标（校友会网）_科学研究","综合指标（校友会网）_人才培养","综合指标（校友会网）_综合声誉"];//rankingd初始化
+var rankArray=["综合指标（校友会网）_人才培养","综合指标（武书连）_自然科学研究","学科排名（武书连）_文学"];//rankingd初始化
 
 d3.csv("data/all.csv", function(error, data) {
   drawMainRank(data);
   drawGeoMap(geoUnivCount);
-})
+});
 
 
 /*
@@ -134,9 +141,9 @@ d3.csv("data/all.csv", function(error, data) {
 */
     function drawMainRank(data){
         var color = d3.scale.ordinal()
-                         .range(["#557381","#cc7f9d","#aeafbf","#eec6ad","#746b7e","#76b0bb","#da8082","#bd96cb","#c5bcaf","#b5c1cf","#a1c5ad","#6e99a2","#3b525a","#9e9dba","#dd9d9c"]);
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-              width = 960 - margin.left - margin.right,
+                         .range(["#9e627a","#cc7f9d","#DA8082","#A37772","#DBAE9E","#EEC6AD","#C4BDA1","#DFD2CA","#3B525A","#6E99A2","#8FABB7","#B5C1CF","#789986","#A1C5AD","#B3CCAC","#675B73","#9E9DBA","#AEAFBF","#BE97CC","#C0BAC9","#577381","#76AFBC","#A9BBC7","#46563F"]);
+        var margin = {top: 20, right: 60, bottom: 20, left: 60},
+              width = winSize.width*0.6 - margin.left - margin.right,
               height = 3000 - margin.top - margin.bottom;
 
         var x = d3.scale.linear()
@@ -145,10 +152,10 @@ d3.csv("data/all.csv", function(error, data) {
         var y = d3.scale.ordinal()
             .rangeRoundBands([0, height], .1);
 
-        var xAxis = d3.svg.axis()
+/*        var xAxis = d3.svg.axis()
             .scale(x)
             .orient("top")
-            .tickFormat(d3.format(".2s"));//?
+            .tickFormat(d3.format(".2s"));//?*/
 
         var yAxis = d3.svg.axis()
             .scale(y)
@@ -156,18 +163,27 @@ d3.csv("data/all.csv", function(error, data) {
 
         var svg = d3.select("body").select(".content").select(".posts").append("svg")
             .attr("width", winSize.width*0.6)
-            .attr("height", winSize.height)
+            .attr("height", winSize.height*0.8)
             .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", "translate(" + margin.left*2 + ",0)");
 
         // data/all.csv data
+        color.domain(d3.keys(data[0]).filter(function(key) { return (key !== "name")&&(key !== "type")&&(key !== "province"); }));
         //color.domain(d3.keys(rankArray));
-          color.domain(d3.keys(data[0]).filter(function(key) { return (key !== "name")&&(key !== "type")&&(key !== "province"); }));
 
           data.forEach(function(d) {
             var x0 = 0;
-            d.param = color.domain().map(function(paramName) {return {paramName: paramName, x0: x0, x1: x0 += +d[paramName]}; });
-            d.score = d.param[d.param.length - 1].x1;//total points
+            var flag = 0;
+            d.param = color.domain().map(function(paramName) {
+              for(var i=flag;i<rankArray.length;i++){
+                if(paramName==rankArray[i]){
+                  flag++;
+                  console.log(rankArray.length);
+                  return {paramName: paramName, x0: x0, x1: x0 += +d[paramName]}; 
+                }
+              }
+            }).filter(function(d){return d != undefined});
+            d.score = d.param[flag-1].x1;//total points
           });
 
           data.sort(function(a, b) { return b.score - a.score; });
@@ -175,18 +191,17 @@ d3.csv("data/all.csv", function(error, data) {
           x.domain([0, d3.max(data, function(d) { return d.score; })]);//bar length
           y.domain(data.map(function(d) { return d.name; }));//university's name
 
-          svg.append("g")
+/*          svg.append("g")
               .attr("class", "x axis")
               //.attr("transform", "translate(0," + height + ")")
-              .call(xAxis);
+              .call(xAxis);*/
 
           svg.append("g")
               .attr("class", "y axis")
               .call(yAxis)
               .append("text")
               .attr("transform", "rotate(-90)")
-              .attr("y", 6)
-              .attr("width",20)
+              .attr("width",40)
               .attr("dy", ".71em")
               .style("text-anchor", "end");
 
@@ -200,7 +215,7 @@ d3.csv("data/all.csv", function(error, data) {
               .data(function(d) { return d.param; })
             .enter().append("rect")
               .attr("height", /*y.rangeBand()*/20)
-              .attr("x", function(d) { return x(d.x0); })
+              .attr("x", function(d) {return x(d.x0); })
               .attr("width", function(d) { return x(d.x1) - x(d.x0); })
               .style("fill", function(d) { return color(d.paramName); });
 
@@ -229,27 +244,29 @@ d3.csv("data/all.csv", function(error, data) {
               .sticky(true)
               .value(function(d) { return d.size; });
 
-          var treemapSvg = d3.select("body").select("#layout").select(".selectParam").select(".tooltip-content").append("div")
-              .attr("class", "selectBoard")
-              .style("position", "relative")
-              .style("float", "left")
-              .style("width", treemapWidth + "px")
-              .style("height", treemapHeight + "px")
+          var treemapSvg = d3.select("body").select("#layout").select(".selectParam").select(".treemap")
+              .append("div")
+                  .attr("class", "selectBoard")
+                  .style("position", "relative")
+                  .style("float", "left")
+                  .style("width", treemapWidth + "px")
+                  .style("height", treemapHeight + "px")
               .append("svg:svg")
-              .attr("width", treemapWidth)
-              .attr("height", treemapHeight)
+                  .attr("width", treemapWidth)
+                  .attr("height", treemapHeight)
               .append("svg:g")
-              .attr("transform", "translate(.5,.5)");
+                  .attr("transform", "translate(.5,.5)");
 
           d3.json("data/flare.json", function(error, root) {
               var nodes = treemap.nodes(root)
                   .filter(function(d) {
                    return !d.children; });
+
               var cell = treemapSvg.selectAll("g")
                   .data(nodes)
                   .enter().append("svg:g")
-                  .attr("class", "cell")
-                  .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+                  .attr("class", function(d){return d.parent.name + d.name;})
+                  .attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")"; })
                   .on("mouseover",function(d,i){
                             d3.select(this).select("rect")
                                .style("fill","#f92572");
@@ -258,7 +275,7 @@ d3.csv("data/all.csv", function(error, data) {
                          if(d3.select(this).select("rect").attr("class")=="clickFlagOn"){
                             d3.select(this).select("rect")
                               .attr("class","clickFlagOff")
-                              .style("fill",function(d) { return treemapColor(d.parent.name); });
+                              .style("fill",function(d) {return treemapColor(d.parent.name); });
                           }else{
                             d3.select(this).select("rect")
                               .attr("class","clickFlagOn")
@@ -277,18 +294,18 @@ d3.csv("data/all.csv", function(error, data) {
                      })
                   .call(treemapDrag);
 
-              cell.append("svg:rect")
-                  .attr("width", function(d) { return d.dx - 1; })
-                  .attr("height", function(d) { return d.dy - 1; })
-                  .attr("class","clickFlagOff")
-                  .style("fill", function(d) { return treemapColor(d.parent.name); });
+                  cell.append("svg:rect")
+                      .attr("width", function(d) { return d.dx - 1; })
+                      .attr("height", function(d) { return d.dy - 1; })
+                      .attr("class","clickFlagOff")
+                      .style("fill", function(d) { return treemapColor(d.parent.name); });
 
-              cell.append("svg:text")
-                  .attr("x", function(d) { return d.dx / 2; })
-                  .attr("y", function(d) { return d.dy / 2; })
-                  .attr("dy", ".35em")
-                  .attr("text-anchor", "middle")
-                  .text(function(d) { return d.name; });
+                  cell.append("svg:text")
+                      .attr("x", function(d) { return d.dx / 2; })
+                      .attr("y", function(d) { return d.dy / 2; })
+                      .attr("dy", ".35em")
+                      .attr("text-anchor", "middle")
+                      .text(function(d) { return d.name; });
           });
 
      }//function drawTreeMap()
@@ -297,15 +314,7 @@ d3.csv("data/all.csv", function(error, data) {
 /*
 *selectable region
 */
-      var region = {
-        "西北": ["新疆", "甘肃", "宁夏", "青海", "陕西"],
-        "东北": ["黑龙江", "吉林", "辽宁"],
-        "华北": ["北京", "天津", "河北", "山西", "内蒙古"],
-        "华中": ["河南", "湖北", "湖南"],
-        "华南": ["广东", "广西", "海南"],
-        "华东": ["山东", "江苏", "安徽", "上海", "浙江", "江西", "福建"],
-        "西南": ["重庆", "四川", "贵州", "云南", "西藏"],
-      }
+
 
 
 

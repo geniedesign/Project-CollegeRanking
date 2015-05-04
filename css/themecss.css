@@ -33,6 +33,34 @@ label{
     color: #f7fcf0;
     text-align: center;
 }
+.selectParam-legend{
+  width: 90%;
+  margin: 0px;
+  text-align: right;
+  font-size: 0.765em;
+  line-height: 1.4;
+}
+.selectParam-legend a{
+  float: left;
+  margin: 0 1em;
+}
+.selectParam-legend span{
+  float: right !important;
+  display: block !important;
+  width:1.4em !important;
+  height:1.4em;
+  border-radius: 2em;
+}
+.selectParam-legend .xiaoyouhui span{
+  background: #CC7F9D;
+}
+.selectParam-legend .wushulianC span{
+  background: #EEC6AD;
+}
+.selectParam-legend .wushulianS span{
+  background: #76B0BB;
+  margin-bottom: 1em;
+}
 .pure-menu ul {
     visibility: visible !important;
     left:0;

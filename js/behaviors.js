@@ -1,6 +1,7 @@
 /*
 *treemap drag
 */
+var rankArray=["综合指标（校友会网）_科学研究","综合指标（校友会网）_人才培养","综合指标（校友会网）_综合声誉"];//rankingd初始化
 var treemapWidth = 300,
     treemapHeight = 300;
 
@@ -51,6 +52,13 @@ function treemapDragended(d) {
 
         d3.select(this)
             .attr("transform", "translate(" + d.x + "," + d.y + ")");
+
+        rankArray.push(d3.select(this).attr("class"));
+  console.log(d3.select(this).attr("class"));
+        d3.csv("data/all.csv", function(error, data) {
+          d3.select(".posts").select("svg").remove();
+          drawMainRank(data);
+        });
 }
 
 /*
@@ -93,11 +101,11 @@ function geomapDragended(d) {
 /*
 *tooltip hover
 */
-d3.select(".tooltip-content").append("div")
+d3.select(".tooltip-content").select(".treemap").append("div")
         .attr("class", "expendSelectArea")
           .style("position", "absolute")
           .style("width", "400px")
-          .style("height", "400px")
+          .style("height", "500px")
           .style("opacity", "0 !important;");
 
 
