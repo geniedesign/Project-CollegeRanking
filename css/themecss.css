@@ -6,43 +6,124 @@ body {
   background: #f7fcf0;
 }
 label{
+    color:#f7fcf0;
     padding: 0.2em 0.3em;
-    display: inline-block;
+    display: block;
     border: none;
     border-radius: 4px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
+text {
+  font-size: 10px;
+  -webkit-transition:all 0.1s ease-in-out;
+  -moz-transition:all 0.1s ease-in-out;
+  -o-transition:all 0.1s ease-in-out;
+  transition:all 0.1s ease-in-out;
+}
+a{
+  text-decoration: none;
+}
+
 
 /*
-*custom
+************pure menu****************
 */
-.tooltipsy
-{
-    padding: 10px;
-    max-width: 200px;
-    color: #303030;
-    background-color: #f5f5b5;
-    border: 1px solid #deca7e;
+#menu{
+  overflow:scroll;
+  overflow-x:hidden !important;
+  overflow-y:hidden !important;
 }
-.tooltip-content{
-    display: inline-block;
-    float: left;
-    width:auto !important;
-    color: #f7fcf0;
-    text-align: center;
+.pure-menu ul {
+    visibility: visible !important;
+    left:0;
+    top:0;
 }
+.pure-menu-list a{
+  border-top: #666 solid 1px;
+  font-size: 1em;
+  color:#f7fcf0 !important;
+  width:100%;
+  display: block;
+  float:left;
+}
+.pure-menu-list a:hover{
+  color:#f92572 !important;
+}
+.pure-menu-list a span{
+  font-size:0.8em;
+  margin-left: 0.5em;
+}
+.pure-menu-list a .showContentFa{
+  float:right;
+  margin-right: 2em;
+}
+.content{
+  max-width: 100% !important;
+}
+#main .content{
+  text-align: left !important;
+}
+.menu-link span, .menu-link span:before, .menu-link span:after{
+  -webkit-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+}
+.pure-menu-heading{
+  background: #000 !important;
+  font-size: 1.4em !important;
+}
+.pure-menu #selectParamContent, 
+.pure-menu #universityTypeContent, 
+.pure-menu #universityRegionContent{
+  float:left;
+  background: #333;
+  -webkit-transition:all 0.3s ease-in-out;
+  -moz-transition:all 0.3s ease-in-out;
+  -o-transition:all 0.3s ease-in-out;
+  transition:all 0.3s ease-in-out;
+}
+.pure-menu #selectParamContent{
+    height:500px;
+}
+.pure-menu #universityTypeContent input{
+  display: none;
+  float:left;
+}
+.pure-menu #universityTypeContent label{
+  display: block;
+  width:4em;
+  padding:0.5em auto;
+  text-align: center;
+  border-radius: 0.2em;
+  background: #F7FCF0;
+  color:#333;
+  margin-right: 0.5em;
+  float:left;
+}
+.pure-menu #universityTypeContent .doubleWidth{
+  width:8.5em !important;
+}
+.pure-menu-list, .pure-menu-item{
+  position: static !important;/**********************************/
+}
+/*
+*pure menu legend
+*/
 .selectParam-legend{
-  width: 90%;
+  width: 160px;
   margin: 0px;
   text-align: right;
   font-size: 0.765em;
   line-height: 1.4;
+  float: left;
 }
 .selectParam-legend a{
   float: left;
-  margin: 0 1em;
+  margin:0.5em 1em;
+}
+.selectParam-legend a:hover,.selectParam-legend a:visited{
+  background: none !important;
 }
 .selectParam-legend span{
   float: right !important;
@@ -59,78 +140,117 @@ label{
 }
 .selectParam-legend .wushulianS span{
   background: #76B0BB;
+}
+.selectParam-legend .wushulianS{
   margin-bottom: 1em;
 }
-.pure-menu ul {
-    visibility: visible !important;
-    left:0;
-    top:0;
-}
-.pure-menu-list i, .pure-menu-list span{
-  display: inline-block;
-  width:100%;
-  float:left;
-  text-align: center;
-}
-.pure-menu-list a{
-  color:#f7fcf0 !important;
-}
-.pure-menu-list a:hover{
-  color:#f92572 !important;
-}
-.pure-menu-list span{
-  font-size: 0.8em;
-}
-.pure-menu-list a{
-  width:100%;
+/*
+*pure menu radar map
+*/
+.radar-container{
   display: block;
-  float:left;
+  float: left;
+  margin-left: 10px;
 }
-.pure-menu-list .pure-menu-item .tooltip-content .type-all{
-   padding:0.5em 1em;
-   margin: 0.5em;
-   display: block;
-    color: #3D4f5D;
-    border-radius: 4px;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    background: #f7fcf0;
-    text-align: center;
+.radar-chart-serie-xiaoyouhui {
+  fill: #CC7F9D;
 }
-.content{
-  max-width: 100% !important;
+.radar-chart-serie-wushulianC{
+  fill: #EEC6AD;
 }
-#main .content{
-  text-align: left !important;
+.radar-chart-serie-wushulianS{
+  fill: #76B0BB;
 }
-.menu-link span, .menu-link span:before, .menu-link span:after{
-  -webkit-box-sizing: content-box !important;
-  box-sizing: content-box !important;
+.radar-chart polygon{
+  stroke: grey;
 }
-.pure-menu-heading{
- /* width:100px;
-  height:83px;
-  display: block !important;
-  background: url("../img/logo2.png") no-repeat !important;*/
-  background: #666 !important;
-  font-size: 1.4em !important;
+
+.radar-chart .level {
+  stroke: grey;
+  stroke-width: 0.5;
 }
-/*.sidebar .nav .param{
-    width:80%;
-    margin-left: 10%;
-    margin-bottom: 1em;
-    padding:0.5em;
-    border: 1px solid #f7fcf0;
-    border-radius: 4px;
+
+.radar-chart .axis line {
+  stroke: grey;
+  stroke-width: 1;
 }
-.sidebar .nav p{
-    line-height: 2em;
-    margin: 0 0 0.5em 0;
-    border-bottom: 1px solid #f7fcf0;
-}*/
+.radar-chart .axis .legend {
+  font-family: sans-serif;
+  font-size: 10px;
+}
+.radar-chart .axis .legend.top {
+  dy:1em;
+}
+.radar-chart .axis .legend.left {
+  text-anchor: start;
+}
+.radar-chart .axis .legend.middle {
+  text-anchor: middle;
+}
+.radar-chart .axis .legend.right {
+  text-anchor: end;
+}
+
+.radar-chart .tooltip {
+  font-family: sans-serif;
+  font-size: 13px;
+  transition: opacity 200ms;
+  opacity: 0;
+}
+.radar-chart .tooltip.visible {
+  opacity: 1;
+}
+
+.radar-chart .area {/* area transition when hovering */
+  stroke-width: 2;
+  fill-opacity: 0.5;
+}
+.radar-chart.focus .area {
+  fill-opacity: 0.1;
+}
+.radar-chart.focus .area.focused {
+  fill-opacity: 0.7;
+}
+
+.radar-chart .circle {
+  fill-opacity: 1;
+}
+
+.radar-chart .area, .radar-chart .circle {/* transitions */
+  transition: opacity 300ms, fill-opacity 200ms;
+  opacity: 1;
+}
+.radar-chart .d3-enter, .radar-chart .d3-exit {
+  opacity: 0;
+}
+/*
+*pure menu treemap
+*/
+rect {
+  fill: none;
+}
+
+.node {
+  border: solid 1px white;
+  font: 10px sans-serif;
+  line-height: 12px;
+  overflow: hidden;
+  position: absolute;
+  text-indent: 2px;
+}
+.selectBoard{
+  margin:20px;
+}
+.clickFlagOn{
+/*  fill:#F7FCF0;*/
+}
+/*
+*pure menu geomap
+*/
 
 
 /*
-*rank
+****************rank****************
 */
 .axis path,
 .axis line {
@@ -147,35 +267,3 @@ label{
   display: none;
 }
 
-/*
-*treemap
-*/
-.chart {
-  display: block;
-  margin: auto;
-  margin-top: 40px;
-}
-
-text {
-  font-size: 10px;
-}
-
-rect {
-  fill: none;
-}
-
-.node {
-  border: solid 1px white;
-  font: 10px sans-serif;
-  line-height: 12px;
-  overflow: hidden;
-  position: absolute;
-  text-indent: 2px;
-}
-.selectBoard{
-  margin:1em;
-}
-
-/*
-*geomap
-*/

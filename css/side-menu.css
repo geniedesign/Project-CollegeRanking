@@ -28,12 +28,12 @@ This is the parent `<div>` that contains the menu and the content area.
     padding-left: 0;
 }
     #layout.active #menu {
-        left: 100px;
-        width: 100px;
+        left: 340px;
+        width: 340px;
     }
 
     #layout.active .menu-link {
-        left: 100px;
+        left: 340px;
     }
 /*
 The content `<div>` is where all your content goes.
@@ -79,24 +79,22 @@ appears on the left side of the page.
 */
 
 #menu {
-    margin-left: -100px; /* "#menu" width */
-    width: 100px;
+    margin-left: -340px; /* "#menu" width */
+    width: 340px;
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
-    z-index: 100; /* so the menu or its navicon stays above all content */
+    z-index: 1000; /* so the menu or its navicon stays above all content */
     background: #191818;
-    /*overflow-y: auto;*/
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
     /*
     All anchors inside the menu should be styled like this.
     */
     #menu a {
-        color: #999;
         border: none;
-        padding: 0.6em 0;
     }
 
     /*
@@ -206,7 +204,7 @@ small screens.
 /*
 Hides the menu at `48em`, but modify this based on your app's needs.
 */
-@media (min-width: 48em) {
+@media (min-width: 480em) {
 
     .header,
     .content {
@@ -215,25 +213,25 @@ Hides the menu at `48em`, but modify this based on your app's needs.
     }
 
     #layout {
-        padding-left: 100px; /* left col width "#menu" */
+        padding-left: 340px; /* left col width "#menu" */
         left: 0;
     }
     #menu {
-        left: 100px;
+        left: 340px;
     }
 
     .menu-link {
         position: fixed;
-        left: 100px;
+        left: 340px;
         display: none;
     }
 
     #layout.active .menu-link {
-        left: 100px;
+        left: 340px;
     }
 }
 
-@media (max-width: 48em) {
+@media (max-width: 480em) {
     /* Only apply this when the window is small. Otherwise, the following
     case results in extra padding on the left:
         * Make the window small.
@@ -242,7 +240,7 @@ Hides the menu at `48em`, but modify this based on your app's needs.
     */
     #layout.active {
         position: relative;
-        left: 100px;
+        left: 340px;
     }
 }
 

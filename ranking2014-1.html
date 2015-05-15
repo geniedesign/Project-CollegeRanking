@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>中国大学排行榜</title>
+  <link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css">
+  <!--[if lte IE 8]>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-old-ie-min.css">
+  <![endif]-->
+    <script src="js/jquery-1.4.js"></script>
+  <!--D3 js-->
+    <script src="./js/d3.v3.min.js"></script>
+    <style>
+    body{
+      background:#1B191C;
+    }
+    #publish{
+      width:60%;
+      height:410px;
+      display: block;
+      overflow: hidden;
+      color:#fff; 
+      position:absolute;
+      
+    }
+    #publish #pieChart{
+      display: inline-block;
+    }
+    #publish .content{
+      width:100%;
+      height:350px;
+      display: inline-block;
+      -moz-column-count:6; /* Firefox */
+      -webkit-column-count:6; /* Safari 和 Chrome */
+      column-count:6;
+    }
+    #publish .content p{
+            background: rgba(249,38,114,0.4);
+    }
+input[type="range"] {
+    -webkit-border-radius: 0; 
+    -webkit-appearance: none !important; 
+    background-color: rgba(249,38,114,0.5);
+    border: 1px solid rgba(249,38,114,1); 
+    width: 300px; 
+    height: 20px; 
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none !important; 
+    cursor: default;
+    height: 20px;
+    width: 9px;
+    background: #777;
+}
+    </style>
+</head>
+
+<body>
+<!--
+=============prepare===============
+-->
+<script>
+var test;
+if((document.all ? 'IE' : 'others') == 'IE'){
+    alert('很抱歉，我们暂不支持IE浏览器，请使用其他浏览器');
+    document.execCommand("Stop")
+}
+</script>
+
+
+<div id="layout">
+        <div class="tooltip-content clearfix"></div>
+        <form method="post">
+            <input id="range" type="range" name="range" min="0" max="700" step="10" value="100" />
+            <output id="result" name="result" style="color:#fff;"><p>200</p></output>
+        </form>
+        <button id="playButton" class="snap" style="display:block;">播放</button>
+        <button id="stopButton" class="snap" style="display:none;">停止</button>
+</div><!--layout end-->
+
+<div id="publish" style="display:none;">
+         <div id="pieChart"></div>  
+         <div class="content"></div>
+</div>
+
+<script>
+var basicUN=200;//初始化学校数目
+
+$(function(){
+   $(".snap").click(function(){
+      $("#playButton").toggle();
+      $("#stopButton").toggle();
+      });  
+  });
+
+d3.csv("data/data2014.csv", function(error, data) {//data20143.csv
+  drawGeoMap(data,basicUN);
+  controlSlider(data);
+  var playControl = getPlayControl(data);
+  $("#playButton").click(function(){playControl.play()});
+  $("#stopButton").click(function(){playControl.stop()});
+});
+
+/*
+*play
+*/
+function getPlayControl(data){
+  var playMap, i = 0;
+  function play(){
+    playMap=setInterval(function(){
+              drawGeoMap(data,i);
+              d3.select("#result").selectAll("p").remove();
+              d3.select("#result").append("p").html(i);
+              var f = document.forms[0],
+                      slider = f['range'];
+                      slider.value = i;
+              if(i<data.length){
+                i++;
+              }else{
+                i = 0;
+              }
+            }, 10);
+  }
+
+  function stop(){
+    clearInterval(playMap);
+  }
+
+  return {
+    play:play,
+    stop:stop
+  };
+}
+
+/*
+*draggable chinamap
+*/
+function drawGeoMap(data,selectedUnivNumber){
+      d3.select(".tooltip-content").select("div").remove();
+
+      var geomapHeight = window.innerHeight;      
+      var geomapWidth  = geomapHeight;
+
+      var geomapSvg = d3.select("body").select("#layout").select(".tooltip-content")
+                  .append("div")
+                  .attr("class", "selectBoard")
+                  .style("position", "relative")
+                  .style("float", "left")
+                  .style("width", geomapWidth + "px")
+                  .style("height", geomapHeight + "px")
+                  .append("svg:svg")
+                  .attr("width", geomapWidth)
+                  .attr("height", geomapHeight)
+                  .append("svg:g")
+                  .attr("transform", "translate(.5,.5)");
+
+      var projection = d3.geo.mercator()
+                .center([105, 35])
+                .scale(geomapWidth-100)
+                .translate([geomapWidth/2, geomapHeight/2]);
+
+      var geomapPath = d3.geo.path()
+              .projection(projection);
+
+      //统计省份中学校的数量
+      var geoUnivCount =[];
+      selectedUnivNumber = selectedUnivNumber ? selectedUnivNumber : basicUN;
+      for(var i=0; i<selectedUnivNumber/*data.length*/;i++){
+            if(geoUnivCount[data[i].province]==null){
+              geoUnivCount[data[i].province] = {"name":data[i].province,count:0};   
+            }
+            geoUnivCount[data[i].province].count++;
+      }
+
+      //制作一个在将学校数量映射到0-10范围内的标尺   
+      var countBackup = Object.keys(geoUnivCount);
+      var countArray = new Array();
+      for(var i = 0;i<countBackup.length;i++){countArray.push(geoUnivCount[countBackup[i]].count);}
+      var countScale = d3.scale.linear()
+          .rangeRound([0,10])
+          .domain([0, d3.max(countArray)]);
+
+      
+      d3.json("data/geoChina.json", function(error, root) {
+
+          if (error) 
+            return console.error(error);
+
+           //绘制热力地图
+          geomapSvg.selectAll("geomapPath")
+            .data( root.features )
+            .enter()
+            .append("path")
+            .attr("stroke","#1B191C")
+            .attr("stroke-width",2)
+            .attr("class",function(d,i){
+                   return d.properties.name;
+            })
+            .style("fill", function(d,i){
+                    var geoUniv;
+                    if(geoUnivCount[d.properties.name] == undefined){
+                      geoUniv=0;
+                    }else{
+                      geoUniv=countScale(geoUnivCount[d.properties.name].count);
+                    }
+                    return "rgba(249,38,114," + geoUniv*0.1 + ")";
+            })
+            .attr("d", geomapPath)
+            .on("click",function(d,i){
+                    d3.select("#publish").selectAll("p").remove();
+
+                    var floatDiv =  document.getElementById("publish");
+                    floatDiv.style.display = "block";
+                    floatDiv.style.left = event.clientX +"px";
+                    floatDiv.style.top = event.clientY+"px";
+
+                    var selectedProvince = d3.select(this).attr("class");
+                    d3.select("#publish").append("p").attr("class","univName").html(selectedProvince);
+                    for(var i = 0;i<selectedUnivNumber;i++){
+                        if(data[i].province == selectedProvince){
+                            d3.select("#publish").select(".content").append("p").html( data[i].name );
+                        }
+                    }
+
+                    drawCollectPiechart(selectedProvince,geoUnivCount,selectedUnivNumber);
+                    //三个参数分别是血色的省份名称，按省份统计的高校数量，高校总数量
+             })
+            .on("mouseover",function(d,i){
+                    d3.select("#publish").selectAll("p").remove();
+
+                    var floatDiv =  document.getElementById("publish");
+                    floatDiv.style.display = "block";
+                    floatDiv.style.left = event.clientX +"px";
+                    floatDiv.style.top = event.clientY+"px";
+
+                    var selectedProvince = d3.select(this).attr("class");
+                    d3.select("#publish").append("p").attr("class","univName").html(selectedProvince);
+                    for(var i = 0;i<selectedUnivNumber;i++){
+                        if(data[i].province == selectedProvince){
+                            d3.select("#publish").select(".content").append("p").html( data[i].name );
+                        }
+                    }
+
+                    drawCollectPiechart(selectedProvince,geoUnivCount,selectedUnivNumber);
+                    //三个参数分别是血色的省份名称，按省份统计的高校数量，高校总数量
+             })
+            .on("mouseout",function(d){
+                      document.getElementById("publish").style.display = "none";
+            });
+
+        });
+}
+
+/*
+*draggable chinamap
+*/
+function drawCollectPiechart(selectedProvince,geoUnivCount,selectedUnivNumber){
+      d3.select("#publish").select("#pieChart").selectAll("svg").remove();
+      var w = 60;
+      var h = w;
+      var part = geoUnivCount[selectedProvince]? geoUnivCount[selectedProvince].count : 0;
+      var total = selectedUnivNumber;
+      var dataset = [part, total];
+
+      var outerRadius = w / 2;
+      var innerRadius = w / 4;
+      var arc = d3.svg.arc()
+              .innerRadius(innerRadius)
+              .outerRadius(outerRadius);
+      var pie = d3.layout.pie();
+
+      var color = d3.scale.category10();
+      //Create SVG element
+      var svg = d3.select("#publish").select("#pieChart")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h);
+      
+      //Set up groups
+      var arcs = svg.selectAll("g.arc")
+              .data(pie(dataset))
+              .enter()
+              .append("g")
+              .attr("class", "arc")
+              .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+      
+      //Draw arc paths
+      arcs.append("path")
+          .attr("fill", function(d, i) {
+            return color(i);
+          })
+          .attr("d", arc);
+}
+
+/*
+*control slider
+*/
+function controlSlider(data){
+    var f = document.forms[0],
+          slider = f['range'],
+          result = f['result'],
+          selectedUnivNumber;
+
+        slider.addEventListener("mouseup", function() {// 当用户选择了值，更新本地存储
+          selectedUnivNumber = slider.value;
+          drawGeoMap(data,selectedUnivNumber);
+        }, false);
+
+        slider.addEventListener("change", function() {// 滑动时显示选择的值
+          d3.select("#result").selectAll("p").remove();
+          d3.select("#result").append("p").html(slider.value);
+        }, false);
+}
+</script>
+
+</body>
+</html>

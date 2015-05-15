@@ -32,4 +32,27 @@
         toggleClass(menuLink, active);
     };
 
+
+    var selectParamItem  = document.getElementById('selectParamItem'),
+        universityTypeItem  = document.getElementById('universityTypeItem'),
+        universityRegionItem  = document.getElementById('universityRegionItem'),
+        shareRankItem = document.getElementById('shareRankItem');
+
+    selectParamItem.onclick = function () {
+        $("#selectParamContent").toggle();
+        $("#selectParamItem .showContentFa").toggle();
+    };
+    universityTypeItem.onclick = function () {
+        $("#universityTypeContent").toggle();
+        $("#universityTypeItem .showContentFa").toggle();
+    };
+    universityRegionItem.onclick = function () {
+        $("#universityRegionContent").toggle();
+        $("#universityRegionItem .showContentFa").toggle();
+    };
+    shareRankItem.onclick = function () {
+        $("#shareRankContent").toggle();
+        $("#shareRankItem .showContentFa").toggle();
+    };
+
 }(this, this.document));
