@@ -16,6 +16,7 @@
   <!--D3 js-->
     <script src="./js/d3.v3.min.js"></script>
     <script src="js/radar-chart.js"></script>
+    <script src="js/jquery-ui-1.10.3.custom.min.js"></script>
    <!--math count-->
     <script src="js/underscore-min.js"></script>
 </head>
@@ -112,8 +113,8 @@ var winSize = getSize();
     </div><!--menu end-->
 
     <div id="main">
-        <div class="header">
-            <h1 class="content-subhead">RANK POST</h1>
+        <div id="test" class="header">
+            <!-- <h1 class="content-subhead">RANK POST</h1> -->
         </div>
 
         <div class="content">
@@ -195,6 +196,16 @@ d3.csv("data/all.csv", function(error, data) {
               .attr("class", "x axis")
               //.attr("transform", "translate(0," + height + ")")
               .call(xAxis);*/
+
+          var category = d3.select("#test").append("svg")
+          .attr("z-index",3000)
+          .attr("width",width)
+          .attr("height",20);
+          category.selectAll("rect").data(rankArray).enter().append("rect")
+          .attr("width",function(d,i){return width/rankArray.length;})
+          .attr("x",function(d,i){return (width*i)/rankArray.length;})
+          .attr("height",20)
+          .attr("fill",function(d){return color(d);});
 
           svg.append("g")
               .attr("class", "y axis")
@@ -554,6 +565,12 @@ d3.csv("data/all.csv", function(error, data) {
                   .call(geomapDrag);
               });
       }
+
+      $(document).ready(function(){
+        $("#test").resizable({
+          handles : "e"
+        });
+      });
 
 </script>
 
