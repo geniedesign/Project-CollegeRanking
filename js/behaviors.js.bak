@@ -98,9 +98,10 @@ function snapDragEnded(){
 		weightArray[i] *= 1 / (1 - abored + 1e-4 );
 	}
 	d3.csv("data/all.csv", function(error, data) {
+        console.log(rankArray);
           d3.select(".posts").select("svg").remove();
           d3.select(".radar-container").select("svg").remove();
-		  d3.select(".postBar").selectAll("span").remove();
+		  d3.select("#test").select("span").remove();
           drawMainRank(data,rankArray);
           drawRadarMap(data,rankArray);
         });

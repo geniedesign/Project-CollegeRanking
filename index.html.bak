@@ -112,9 +112,9 @@ var winSize = getSize();
                         <a href="#" id="shareRankItem" class="pure-menu-link"><i class="fa fa-share-alt-square"></i><span>分享</span><i class="showContentFa fa fa-chevron-down" style="display:block;"></i><i class="showContentFa fa fa-chevron-up" style="display:none;"></i></a>
                         <!-- JiaThis Button BEGIN -->
                         <div id="shareRankContent" class="ckepop" style="display:none;">
-                              <a class="jiathis_button_weixin"><i class="fa fa-weixin fa-2x"></i></a> 
-                              <a href="http://www.jiathis.com/share"  class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"><i class="fa fa-share-alt fa-2x"></i></a>
-                              <!-- <a class="jiathis_counter_style"></a> </div>  -->
+                              <a class="jiathis_button_weixin">微信</a> 
+                              <a href="http://www.jiathis.com/share"  class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+                              <a class="jiathis_counter_style"></a> </div> 
                               <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1" charset="utf-8"></script>
                         </div> 
                         <!-- JiaThis Button END -->
@@ -124,15 +124,13 @@ var winSize = getSize();
     </div><!--menu end-->
 
     <div id="main">
-        <div class="header">
-            <h2 class="content-subhead">RANK POST</h2>
+        <div id="test" class="header">
+            <!-- <h1 class="content-subhead">RANK POST</h1> -->
         </div>
 
         <div class="content">
-              <div class="postBar">
-                <div class="postBarIcons"><i class="fa fa-trash-o"></i><i class="fa fa-files-o"></i></div>
+              <div class="posts">   
               </div>
-              <div class="posts"></div>
         </div>
     </div><!---main end-->
 
@@ -148,14 +146,14 @@ var weightArray=[1/3,1/3,1/3];
 var snapArray= [];
 
 /*
-*draw Snap
+*draw main rank
 */
 	function drawSnap(data,snapArray){
 		var color = d3.scale.ordinal()
                          .range(["#9e627a","#cc7f9d","#DA8082","#A37772","#DBAE9E","#EEC6AD","#C4BDA1","#DFD2CA","#3B525A","#6E99A2","#8FABB7","#B5C1CF","#789986","#A1C5AD","#B3CCAC","#675B73","#9E9DBA","#AEAFBF","#BE97CC","#C0BAC9","#577381","#76AFBC","#A9BBC7","#46563F"]);
 
 		var margin = {top: 20, right: 60, bottom: 20, left: 60},
-              width = 840 - margin.left - margin.right,
+              width = winSize.width*0.6 - margin.left - margin.right,
               height = 3000 - margin.top - margin.bottom;
 		var x = d3.scale.linear()
             .rangeRound([0, width]);
@@ -220,14 +218,11 @@ var snapArray= [];
               .style("fill", function(d) {return color(d.paramName); });
 	}
 
-/*
-*draw main rank
-*/
     function drawMainRank(data,rankArray){
         var color = d3.scale.ordinal()
                          .range(["#9e627a","#cc7f9d","#DA8082","#A37772","#DBAE9E","#EEC6AD","#C4BDA1","#DFD2CA","#3B525A","#6E99A2","#8FABB7","#B5C1CF","#789986","#A1C5AD","#B3CCAC","#675B73","#9E9DBA","#AEAFBF","#BE97CC","#C0BAC9","#577381","#76AFBC","#A9BBC7","#46563F"]);
         var margin = {top: 20, right: 60, bottom: 20, left: 60},
-              width = 840 - margin.left - margin.right,
+              width = winSize.width*0.6 - margin.left - margin.right,
               height = 3000 - margin.top - margin.bottom;
 
         var x = d3.scale.linear()
@@ -245,7 +240,11 @@ var snapArray= [];
             .scale(y)
             .orient("left");
 
-
+        var svg = d3.select("body").select(".content").select(".posts").append("svg")
+            .attr("width", winSize.width*0.6)
+            .attr("height", winSize.height*0.8)
+            .append("g")
+            .attr("transform", "translate(" + margin.left*2 + ",0)");
 
         // data/all.csv data
         color.domain(d3.keys(data[0]).filter(function(key) { return (key !== "name")&&(key !== "type")&&(key !== "province"); }));
@@ -274,32 +273,30 @@ var snapArray= [];
 
 		//alert(rankArray);
 
-		
-          var category = d3.select(".postBar")
-          .attr("width",width-120)
+		var tp = rankArray;
+          var category = d3.select("#test")
+          .attr("width",width)
           .attr("height",20)
           .style("display","block")
           .selectAll("span")
-         .data(rankArray).enter()
+         .data(tp).enter()
           .append("span")
           .attr("class","testdiv")
-	     .attr("id",function(d){return d;})
-          .style("width", function(){
-            console.log(width/rankArray.length);
-              $(this).width((width-120)/rankArray.length);
-              return (width-120)/rankArray.length;
-          })
+		  .attr("id",function(d){return d;})
+          .style("float","left")
+          .style("display","block")
+          .attr("width",width/tp.length)
           .style("height",20)
           .style("background",function(d){return color(d);})
           .html(function(d){
-      	  	  var t = d.split("_");
-      	  	  return t[1];
-      	})
-          .on("dblclick",function(d){
-      		  snapArray.push(d);
-      		  drawSnap(data,snapArray);
-      	})
-      	.call(categoryDrag);
+		  	  var t = d.split("_");
+		  	  return t[1];
+		  })
+		  .on("dblclick",function(d){
+			  snapArray.push(d);
+			  drawSnap(data,snapArray);
+		  })
+		  .call(categoryDrag);
 
          $("span.testdiv").resizable({
            handles : "e",
@@ -324,13 +321,6 @@ var snapArray= [];
 			   });
 		   }
          });
-
-        var svg = d3.select("body").select(".content").select(".posts").append("svg")
-            .attr("width", width)
-            .attr("height", winSize.height*0.8)
-            .append("g")
-            .attr("transform", "translate(" + margin.left*2 + ",0)");
-
           svg.append("g")
               .attr("class", "y axis")
               .call(yAxis)
