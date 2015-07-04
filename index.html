@@ -9,6 +9,7 @@
   <!--pure css-->
   <link rel="stylesheet" href="css/pure-min.css">
   <link rel="stylesheet" href="css/side-menu.css">
+  <link rel="stylesheet" href="css/tooltip-box.css">
   <!--[if lte IE 8]>
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-old-ie-min.css">
   <![endif]-->
@@ -22,14 +23,15 @@
 
     <!--add-->
     <link href = "css/add/theme/jquery-ui.css" rel = "stylesheet"/>
-    <link href = "css/add/jquery.dataTables.css" rel = "stylesheet"/>
+    
 
+ <!--   <link href = "css/add/jquery.dataTables.css" rel = "stylesheet"/>
     <script src = "js/add/d3.v3.min.js"></script>
-    <script src = "js/add/jquery-1.10.2.min.js"></script>
+    <script src = "js/add/jquery-1.10.2.min.js"></script>-->
     <script src = "js/add/jquery-ui-1.10.3.custom.min.js"></script>
-    <script src = "js/add/jquery.dataTables.min.js"></script>
+ <!--   <script src = "js/add/jquery.dataTables.min.js"></script>
     <script src = "js/add/jquery.spin.js"></script>
-    <script src = "js/add/spin.js"></script>
+    <script src = "js/add/spin.js"></script>-->
 </head>
 
 <body class>
@@ -65,28 +67,28 @@ var winSize = getSize();
 </script>
 
 
-<div id="layout">
+<div id="layout" class=" active">
 
-    <a href="#menu" id="menuLink" class="menu-link">
+    <a href="#menu" id="menuLink" class="menu-link" class=" active">
         <!-- Hamburger icon -->
         <span></span>
     </a>
 
-    <div id="menu">
+    <div id="menu" class=" active">
         <div class="pure-menu">
-            <a class="pure-menu-heading" href="#">College Ranking Post</a>
+            <a class="pure-menu-heading" href="#">2015高校排名可视化</a>
 
             <ul class="pure-menu-list">
 
                 <li class="pure-menu-item selectParam">
-                        <a href="#" id="selectParamItem" class="pure-menu-link"><i class="fa fa-check-square"></i><span>选择参数</span><i class="showContentFa fa fa-chevron-down" style="display:none;"></i><i class="showContentFa fa fa-chevron-up" style="display:block;"></i></a>
+                        <a href="#" id="selectParamItem" class="pure-menu-link clickFlagOn"><i class="fa fa-bookmark"></i></i><span>参考指标</span><i class="showContentFa fa fa-chevron-down" style="display:none;"></i><i class="showContentFa fa fa-chevron-up" style="display:block;"></i></a>
                         <div id="selectParamContent" class="clearfix" style="display:block;">
                             <div class="treemap"></div>
                             <div class="radar-container"></div>
                             <div class="selectParam-legend">
-                              <a href="#" class="xiaoyouhui">综合指标（校友会网）<span></span></a>
-                              <a href="#"class="wushulianC">综合指标（武书连）<span></span></a>
-                              <a href="#" class="wushulianS">学科排名（武书连）<span></span></a>
+                              <a href="#" id="xiaoyouhui">综合指标（校友会网）_<span></span></a>
+                              <a href="#"id="wushulianC">综合指标（武书连）_<span></span></a>
+                              <a href="#" id="wushulianS">学科排名（武书连）_<span></span></a>
                             </div>
                         </div>
                 </li>
@@ -124,15 +126,12 @@ var winSize = getSize();
     </div><!--menu end-->
 
     <div id="main">
-        <div class="header">
-            <h2 class="content-subhead">RANK POST</h2>
-        </div>
+<!--         <div class="header">
+            <h2 class="content-subhead"></h2>
+        </div> -->
 
         <div class="content">
-              <div class="postBar">
-                <div class="postBarIcons"><i class="fa fa-trash-o"></i><i class="fa fa-files-o"></i></div>
-              </div>
-              <div class="posts"></div>
+
         </div>
     </div><!---main end-->
 
@@ -141,566 +140,6 @@ var winSize = getSize();
 <script src="js/pureUI.js"></script>
 <!--drag/hover/-->
 <script src="js/behaviors.js"></script>
-
-<script>
-var rankArray=["综合指标（校友会网）_人才培养","学科排名（武书连）_文学","综合指标（武书连）_自然科学研究"];//rankingd初始化
-var weightArray=[1/3,1/3,1/3];
-var snapArray= [];
-
-/*
-*draw Snap
-*/
-	function drawSnap(data,snapArray){
-		var color = d3.scale.ordinal()
-                         .range(["#9e627a","#cc7f9d","#DA8082","#A37772","#DBAE9E","#EEC6AD","#C4BDA1","#DFD2CA","#3B525A","#6E99A2","#8FABB7","#B5C1CF","#789986","#A1C5AD","#B3CCAC","#675B73","#9E9DBA","#AEAFBF","#BE97CC","#C0BAC9","#577381","#76AFBC","#A9BBC7","#46563F"]);
-
-		var margin = {top: 20, right: 60, bottom: 20, left: 60},
-              width = 840 - margin.left - margin.right,
-              height = 3000 - margin.top - margin.bottom;
-		var x = d3.scale.linear()
-            .rangeRound([0, width]);
-
-        var y = d3.scale.ordinal()
-            .rangeRoundBands([0, height], .1);
-
-        /*var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("top")
-            .tickFormat(d3.format(".2s"));//?*/
-
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left");
-
-        var svg = d3.select("body").select(".content").select(".posts").append("svg")
-            .attr("width", winSize.width*0.6)
-            .attr("height", winSize.height*0.8)
-            .append("g")
-            .attr("transform", "translate(" + margin.left*2 + ",0)");
-		
-		color.domain(d3.keys(data[0]).filter(function(key) { return (key !== "name")&&(key !== "type")&&(key !== "province"); }));
-
-          data.forEach(function(d) {
-            var x0 = 0;
-            d.param = color.domain().map(function(paramName) {
-              var index = snapArray.indexOf(paramName);
-              if (index > -1) {
-                return {paramName: paramName, x0: x0, x1: x0 += +d[paramName]}; 
-              }
-            }).filter(function(d){return d != undefined});
-            d.score = d.param[snapArray.length-1].x1;//total points
-          });
-
-          data.sort(function(a, b) { return b.score - a.score; });
-
-          x.domain([0, d3.max(data, function(d) { return d.score; })]);//bar length
-          y.domain(data.map(function(d) { return d.name; }));//university's name
-
-		  svg.append("g")
-              .attr("class", "y axis")
-              .call(yAxis)
-              .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("width",40)
-              .attr("dy", ".71em")
-              .style("text-anchor", "end");
-
-          var university = svg.selectAll(".university")
-              .data(data)
-              .enter().append("g")
-              .attr("class", "university")
-              .attr("transform", function(d) { return "translate(0," + y(d.name) + ")"; });
-
-          university.selectAll("rect")
-              .data(function(d) { return d.param; })
-            .enter().append("rect")
-              .attr("height", /*y.rangeBand()*/20)
-              .attr("x", function(d) {return x(d.x0); })
-              .attr("width", function(d) { return x(d.x1) - x(d.x0); })
-              .style("fill", function(d) {return color(d.paramName); });
-	}
-
-/*
-*draw main rank
-*/
-    function drawMainRank(data,rankArray){
-        var color = d3.scale.ordinal()
-                         .range(["#9e627a","#cc7f9d","#DA8082","#A37772","#DBAE9E","#EEC6AD","#C4BDA1","#DFD2CA","#3B525A","#6E99A2","#8FABB7","#B5C1CF","#789986","#A1C5AD","#B3CCAC","#675B73","#9E9DBA","#AEAFBF","#BE97CC","#C0BAC9","#577381","#76AFBC","#A9BBC7","#46563F"]);
-        var margin = {top: 20, right: 60, bottom: 20, left: 60},
-              width = 840 - margin.left - margin.right,
-              height = 3000 - margin.top - margin.bottom;
-
-        var x = d3.scale.linear()
-            .rangeRound([0, width]);
-
-        var y = d3.scale.ordinal()
-            .rangeRoundBands([0, height], .1);
-
-        /*var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("top")
-            .tickFormat(d3.format(".2s"));//?*/
-
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left");
-
-
-
-        // data/all.csv data
-        color.domain(d3.keys(data[0]).filter(function(key) { return (key !== "name")&&(key !== "type")&&(key !== "province"); }));
-        //color.domain(d3.keys(rankArray));
-
-          data.forEach(function(d) {
-            var x0 = 0;
-            d.param = color.domain().map(function(paramName) {
-              var index = rankArray.indexOf(paramName);
-              if (index > -1) {
-                return {paramName: paramName, x0: x0, x1: x0 += +(d[paramName]*weightArray[index])}; 
-              }
-            }).filter(function(d){return d != undefined});
-            d.score = d.param[rankArray.length-1].x1;//total points
-          });
-
-          data.sort(function(a, b) { return b.score - a.score; });
-
-          x.domain([0, d3.max(data, function(d) { return d.score; })]);//bar length
-          y.domain(data.map(function(d) { return d.name; }));//university's name
-
-          /*svg.append("g")
-              .attr("class", "x axis")
-              //.attr("transform", "translate(0," + height + ")")
-              .call(xAxis);*/
-
-		//alert(rankArray);
-
-		
-          var category = d3.select(".postBar")
-          .attr("width",width-120)
-          .attr("height",20)
-          .style("display","block")
-          .selectAll("span")
-         .data(rankArray).enter()
-          .append("span")
-          .attr("class","testdiv")
-	     .attr("id",function(d){return d;})
-          .style("width", function(){
-            console.log(width/rankArray.length);
-              $(this).width((width-120)/rankArray.length);
-              return (width-120)/rankArray.length;
-          })
-          .style("height",20)
-          .style("background",function(d){return color(d);})
-          .html(function(d){
-      	  	  var t = d.split("_");
-      	  	  return t[1];
-      	})
-          .on("dblclick",function(d){
-      		  snapArray.push(d);
-      		  drawSnap(data,snapArray);
-      	})
-      	.call(categoryDrag);
-
-         $("span.testdiv").resizable({
-           handles : "e",
-		   stop: function(e,ui){
-			   var size_now = ui.size.width;
-			   var size_orig = ui.originalSize.width;
-			   var width_now = width + size_now - size_orig;
-			   var weight = size_now / (width_now + 1e-4);
-			   var name = $(this).attr("id");
-			   var cor = (1 - weight) / (1 - (size_orig / (width + 1e-4)) + 1e-4);
-			   var index = rankArray.indexOf(name);
-			   for(var i = 0;i < weightArray.length;i++){
-				   weightArray[i] *= cor;
-			   }
-			   weightArray[index] = weight;
-			   d3.csv("data/all.csv", function(error, data) {
-				console.log(rankArray);
-				d3.select(".posts").select("svg").remove();
-				d3.select(".radar-container").select("svg").remove();
-				drawMainRank(data,rankArray);
-				drawRadarMap(data,rankArray);
-			   });
-		   }
-         });
-
-        var svg = d3.select("body").select(".content").select(".posts").append("svg")
-            .attr("width", width)
-            .attr("height", winSize.height*0.8)
-            .append("g")
-            .attr("transform", "translate(" + margin.left*2 + ",0)");
-
-          svg.append("g")
-              .attr("class", "y axis")
-              .call(yAxis)
-              .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("width",40)
-              .attr("dy", ".71em")
-              .style("text-anchor", "end");
-
-          var university = svg.selectAll(".university")
-              .data(data)
-              .enter().append("g")
-              .attr("class", "university")
-              .attr("transform", function(d) { return "translate(0," + y(d.name) + ")"; });
-
-          university.selectAll("rect")
-              .data(function(d) { return d.param; })
-            .enter().append("rect")
-              .attr("height", /*y.rangeBand()*/20)
-              .attr("x", function(d) {return x(d.x0); })
-              .attr("width", function(d) { return x(d.x1) - x(d.x0); })
-              .style("fill", function(d) {return color(d.paramName); });
-    }//function drawMainRank()
-
-
-/*
-*draggable treemap
-*/
-     function drawTreeMap(rankArray){
-          var treemapColor = d3.scale.ordinal()
-                                   .range(["#CC7F9D","#EEC6AD","#76B0BB"]);
-
-          var treemapWidth = 300,
-                treemapHeight = 300;
-
-          var treemap = d3.layout.treemap()
-              .round(false)
-              .size([treemapWidth, treemapHeight])
-              .sticky(true)
-              .value(function(d) { return d.size; });
-
-          var treemapSvg = d3.select("body").select("#layout").select(".selectParam").select(".treemap")
-              .append("div")
-                  .attr("class", "selectBoard")
-                  .style("position", "relative")
-                  .style("float", "left")
-                  .style("width", treemapWidth + "px")
-                  .style("height", treemapHeight + "px")
-              .append("svg:svg")
-                  .attr("width", treemapWidth)
-                  .attr("height", treemapHeight)
-              .append("svg:g")
-                  .attr("transform", "translate(.5,.5)");
-
-          d3.json("data/flare.json", function(error, root) {
-              var nodes = treemap.nodes(root)
-                  .filter(function(d) {
-                   return !d.children; });
-
-              var cell = treemapSvg.selectAll("g")
-                  .data(nodes)
-                  .enter().append("svg:g")
-                  .attr("class", function(d){return d.parent.name + d.name;})
-                  .attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")"; })
-                  .on("mouseover",function(d,i){
-                            d3.select(this).select("rect")
-                               .style("fill","#F7FCF0");
-                   })
-                  .on("mouseout",function(d,i){
-                           if(d3.select(this).select("rect").attr("class")=="clickFlagOn"){
-                              d3.select(this).select("rect")
-                                .style("fill","#F7FCF0");
-                            }else{
-                              d3.select(this).select("rect")
-                               .style("fill", function(d) {return treemapColor(d.parent.name); });
-                            }
-                     })
-                  .on("click", function(d) {
-                         if(d3.select(this).select("rect").attr("class")=="clickFlagOn"){
-                            d3.select(this).select("rect")
-                              .attr("class","clickFlagOff")
-                              .style("fill",function(d) {return treemapColor(d.parent.name); });
-                          }else{
-                            d3.select(this).select("rect")
-                              .attr("class","clickFlagOn")
-                              .style("fill", "#F7FCF0");
-                          }
-                  })
-                  .call(treemapDrag);
-
-                  cell.append("svg:rect")
-                      .attr("width", function(d) { return d.dx - 1; })
-                      .attr("height", function(d) { return d.dy - 1; })
-                      .style("fill", function(d) { return treemapColor(d.parent.name); });
-
-                  cell.append("svg:text")
-                      .attr("x", function(d) { return d.dx / 2; })
-                      .attr("y", function(d) { return d.dy / 2; })
-                      .attr("dy", ".35em")
-                      .attr("text-anchor", "middle")
-                      .text(function(d) { return d.name; });
-
-                  cell.attr("alt", function(d){
-                         var index = rankArray.indexOf(d.parent.name + d.name);
-                          if (index > -1) {
-                            /*d3.select(this).style("fill","#F7FCF0");*/
-                            d3.select(this).append("svg:polygon")
-                                  .attr("points", "0,0 0,15 15,0")
-                                  .style("fill","#F92572");
-                            d3.select(this).select("rect")
-                                  .attr("class","clickFlagOn")
-                                  .style("fill","#F7FCF0");
-                          }
-                  })
-          });
-
-     }//function drawTreeMap()
-
-
-/*
-*radar map
-*/
-      function drawRadarMap(data,rankArray){
-
-        var a = 0,
-              b = 0,
-              c = 0;
-        for(var i = 0;i<rankArray.length;i++){
-          var flag= rankArray[i].split('_');
-          if(flag[0]=="综合指标（校友会网）"){
-            a++;
-          }else if(flag[0]=="综合指标（武书连）"){
-            b++;
-          }else if(flag[0]=="学科排名（武书连）"){
-            c++;
-          }else{
-            console.log("raderData error");
-          }
-        }
-
-          var radarData = [
-            {
-              className: 'paramUsed', // optional can be used for styling
-              axes: [
-                {axis: "xiaoyouhui", value: a,  yOffset: 10}, 
-                {axis: "wushulianC", value: b,}, 
-                {axis: "wushulianS", value: c,}
-              ]
-            }
-          ];
-
-          var chart = RadarChart.chart();
-          var svg = d3.select("#layout").select(".selectParam").select('.radar-container').append('svg')
-            .attr('width', 120)
-            .attr('height', 110);
-          // draw one
-          svg.append('g').classed('focus', 1).datum(radarData)
-          .attr('transform', function(d, i) { return 'translate(10,10)'; })
-          .call(chart);
-      }
-
-/*
-*selectable type buttons
-*/
-     function  drawTypeSelectButtons(data){
-           var univTypeWidth = 300,
-                 univTypeHeight = 80,
-                 margin = 20; 
-
-         var univTypeCount = _.unique(data.map(function(d){return d.type}).sort());
-         //统计学校的类型
- 
-          /*var univTypeCount=[];
-              for(var i=0; i<data.length;i++){
-                     console.log(data[i].type);
-                     console.log(univTypeCount);
-                       if($.inArray(data[i].type, univTypeCount) == -1){
-                univTypeCount.push(data[i].type); 
-              }
-          }*/
-
-            var univTypeDiv = d3.select("body").select("#layout").select(".universityType").select("#universityTypeContent").select("#type-list")
-                        .attr("class", "selectBoard")
-                        .style("position", "relative")
-                        .style("float", "left")
-                        .style("width", univTypeWidth + "px")
-                        .style("height", univTypeHeight + "px")
-                        .style("margin", margin + "px")
-                      .append("form");
-
-            univTypeDiv.append("input")
-                    .attr("type", "checkbox")
-                    .attr("checked", "true")
-                    .attr("id","type-all")
-                    .attr("class", "region")
-                    .on("click", "false");
-            univTypeDiv.append("label")
-                    .attr("for","type-all")
-                    .attr("class", "for doubleWidth")
-                    .text("全选")
-                    .on("mouseover",function(d,i){
-                              d3.select(this)
-                                 .style("background","#f92572");
-                        })
-                        .on("mouseout",function(d,i){
-                             if($(this).hasClass("clickFlagOn")){
-                                d3.select(this)
-                                  .style("background", "#f92572");
-                              }else{
-                                d3.select(this)
-                                  .style("background", "#F7FCF0");
-                              }
-                        })
-                        .on("click",function(d,i){
-                             if($(this).hasClass("clickFlagOn")){
-                                univTypeDiv.selectAll("label")
-                                  .attr("class","for clickFlagOff")
-                                  .style("background", "#F7FCF0");
-                                d3.select(this)
-                                  .attr("class","for doubleWidth clickFlagOff")
-                                  .text("全选");
-                              }else{
-                                univTypeDiv.selectAll("label")
-                                  .attr("class","for clickFlagOn")
-                                  .style("background", "#f92572");
-                                d3.select(this)
-                                  .attr("class","for doubleWidth clickFlagOn")
-                                  .text("取消全选");
-                              }
-                        });
-
-            for(var i = 0; i<univTypeCount.length; i ++){
-                univTypeDiv.append("input")
-                        .attr("type", "checkbox")
-                        .attr("checked", "true")
-                        .attr("id","type"+i)
-                        .attr("class", "region")
-                        .on("click", "false");
-                univTypeDiv.append("label")
-                        .attr("for","type"+i)
-                        .attr("class", "for")
-                        .text(univTypeCount[i])
-                        .on("mouseover",function(d,i){
-                              d3.select(this)
-                                 .style("background","#f92572");
-                        })
-                        .on("mouseout",function(d,i){
-                             if($(this).hasClass("clickFlagOn")){
-                                d3.select(this)
-                                  .style("background", "#f92572");
-                              }else{
-                                d3.select(this)
-                                  .style("background", "#F7FCF0");
-                              }
-                        })
-                        .on("click",function(d,i){
-                             if($(this).hasClass("clickFlagOn")){
-                                d3.select(this)
-                                  .attr("class","for clickFlagOff")
-                                  .style("background", "#F7FCF0");
-                              }else{
-                                d3.select(this)
-                                  .attr("class","for clickFlagOn")
-                                  .style("background", "#f92572");
-                              }
-                        });
-            }
-
-     }
-
-/*
-*draggable chinamap
-*/
-      function drawGeoMap(data){
-           var geoUnivCount={};
-
-            for(var i=0; i<data.length;i++){
-              if(geoUnivCount[data[i].province]==null){
-                geoUnivCount[data[i].province] = {"name":data[i].province,count:0};   
-              }
-              geoUnivCount[data[i].province].count++;
-            }//统计了省份中学校的数量
-
-            var geomapWidth  = 300;
-            var geomapHeight = 300;
-            
-            var geomapSvg = d3.select("body").select("#layout").select(".universityRegion").select("#universityRegionContent").append("div")
-                        .attr("class", "selectBoard")
-                        .style("position", "relative")
-                        .style("float", "left")
-                        .style("width", geomapWidth + "px")
-                        .style("height", geomapHeight + "px")
-                        .append("svg:svg")
-                        .attr("width", geomapWidth)
-                        .attr("height", geomapHeight)
-                        .append("svg:g")
-                        .attr("transform", "translate(.5,.5)");
-            
-            var projection = d3.geo.mercator()
-                      .center([105, 35])
-                      .scale(geomapHeight-20)
-                      .translate([geomapWidth/2, geomapHeight/2]);
-            
-            var geomapPath = d3.geo.path()
-                    .projection(projection);
-            
-            d3.json("data/geoChina.json", function(error, root) {
-              
-              if (error) 
-                return console.error(error);
-              
-              geomapSvg.selectAll("geomapPath")
-                .data( root.features )
-                .enter()
-                .append("path")
-                .attr("stroke","#333")
-                .attr("stroke-width",1)
-                .style("fill", function(d,i){
-                  d.x = 0;
-                  d.y = 0;
-                  var geoUniv = geoUnivCount[d.properties.name];
-                          if(geoUniv == null){
-                            return "#000";
-                          }else{
-                            if(geoUniv.count*0.1>1){
-                              return "rgba(249,38,114,1.0)";
-                            }
-                            return "rgba(249,38,114," + geoUniv.count*0.1 + ")";
-                          }
-                })
-                .attr("d", geomapPath)
-                .on("mouseover",function(d,i){
-                        d3.select(this)
-                             .style("fill","#f7fcf0");
-                         d3.select(this.parentNode).select("text").remove();
-                         d3.select(this.parentNode)
-                            .append("svg:text")
-                             .text(d.properties.name)
-                             .style("fill","#f7fcf0")
-                             .attr("transform", "translate(" + event.clientX + "," + event.clientY/2 + ")");
-                 })
-                 .on("mouseout",function(d,i){
-                          d3.select(this)
-                          .style("fill", function(d,i){
-                                  var geoUniv = geoUnivCount[d.properties.name];
-                                          if(geoUniv == null){
-                                            return "#000";
-                                          }else{
-                                            if(geoUniv.count*0.1>1){
-                                              return "rgba(249,38,114,1.0)";
-                                            }
-                                            return "rgba(249,38,114," + geoUniv.count*0.1 + ")";
-                                          }
-                            })
-                   })
-                  .call(geomapDrag);
-              });
-      }
-
-       $(document).ready(function(){
-		   d3.csv("data/all.csv", function(error, data) {
-		   drawMainRank(data,rankArray);
-		   drawTreeMap(rankArray);
-		   drawGeoMap(data);
-		   drawTypeSelectButtons(data);
-		   drawRadarMap(data,rankArray);
-	   });
-       });
-
-</script>
 
 </body>
 </html>
